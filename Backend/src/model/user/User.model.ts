@@ -20,7 +20,12 @@ const UserSchema: Schema<IUser> = new Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"]
-    }
+    },
+    otp: { type: String },
+    otpExpires: { type: Date },
+    isVerified: { type: Boolean, default: false },
+    refreshToken: { type: String }
+
   },
   { timestamps: true }
 );

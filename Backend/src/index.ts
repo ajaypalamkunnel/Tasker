@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import cors from 'cors'
 import { ROUTE_PATH } from "./constants/routePath";
 import userRoute from "./routes/userRouter"
+import morganMiddleware from "./middleware/morganMiddleware";
 const app = express()
 const PORT = config.port
 
@@ -31,6 +32,7 @@ app.use(
 app.use(cookieParser())
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
+app.use(morganMiddleware)
 
 
 app.get('/', (_req, res) => {
