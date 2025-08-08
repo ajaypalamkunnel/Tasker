@@ -1,17 +1,27 @@
-
-import { Document, ObjectId, Types } from "mongoose";
-
 export type TaskStatus = "pending" | "in-progress" | "completed";
 
-export interface ITask extends Document {
-  _id: ObjectId
-  userId: Types.ObjectId; 
+export interface ITask {
+  _id: string;
+  userId: string;
   title: string;
   description: string;
   status: TaskStatus;
-  dueDate: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
+  dueDate: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ICreateTaskData {
+  title: string;
+  description: string;
+  dueDate: string;
+}
+
+export interface IUpdateTaskData {
+  title?: string;
+  description?: string;
+  status?: TaskStatus;
+  dueDate?: string;
 }
 
 export interface ITaskFilter {
@@ -32,4 +42,4 @@ export interface IPaginatedTasksResponse {
     hasNextPage: boolean;
     hasPrevPage: boolean;
   };
-}
+} 

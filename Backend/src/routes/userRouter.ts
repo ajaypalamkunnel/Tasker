@@ -8,6 +8,9 @@ import TaskController from "../controller/implementation/tasks/TaskController";
 import { validateRequest } from "../middleware/validate";
 import { RegisterDto } from "../dtos/requestdtos/register.dto";
 import { LoginDto } from "../dtos/requestdtos/login.dto";
+import { CreateTaskDto } from "../dtos/requestdtos/create-task.dto";
+import { FetchTasksDto } from "../dtos/requestdtos/fetch-tasks.dto";
+import authMiddleware from "../middleware/authMiddleware";
 
 
 const router = Router()
@@ -20,7 +23,7 @@ const userService = new UserService(userRepository)
 const userController = new UserController(userService)
 
 const taskRepository = new TaskRepository()
-const taskService = new TaskService(taskRepository,userRepository)
+const taskService = new TaskService(taskRepository)
 const taskController = new TaskController(taskService,userService)
 
 
@@ -29,6 +32,13 @@ router.post("/signup",validateRequest(RegisterDto),userController.registerUser)
 router.post("/login",validateRequest(LoginDto),userController.postLogin)
 router.post("/logout",userController.logout)
 router.post("/refresh-token",userController.renewAuthTokens)
+
+// Task routes
+router.get("/tasks", authMiddleware, taskController.fetchTasks)
+router.post("/tasks", authMiddleware, validateRequest(CreateTaskDto), taskController.addTask)
+router.patch("/tasks/:id/status", authMiddleware, taskController.updateTaskStatus)
+router.put("/tasks/:id", authMiddleware, taskController.editTask)
+router.delete("/tasks/:id", authMiddleware, taskController.deleteTask)
 
 
 

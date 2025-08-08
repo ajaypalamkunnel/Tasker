@@ -37,7 +37,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <a href="/">
-            <h1 className="text-xl font-bold text-gray-900">Articlio Feeds</h1>
+            <h1 className="text-xl font-bold text-gray-900">Tasker</h1>
 
             </a>
           </div>

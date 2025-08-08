@@ -4,7 +4,7 @@ import { ITask } from "../../types/tasks.types";
 
 const TaskSchema: Schema<ITask> = new Schema(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true
