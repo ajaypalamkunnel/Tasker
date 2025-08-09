@@ -5,6 +5,8 @@ import { RegisterDto } from "../../../dtos/requestdtos/register.dto";
 import { ERROR_MESSAGES, StatusCode } from "../../../constants/statusCode";
 import { CustomError } from "../../../utils/CustomError";
 import { config } from "../../../config/env";
+import { BlacklistedTokenModel } from "../../../model/blacklistedTokens/BlacklistedToken.model";
+import JwtUtils from "../../../utils/jwtUtils";
 
 class UserController implements IUserController {
     private _userService: IUserService;
@@ -78,17 +80,18 @@ class UserController implements IUserController {
 
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
-                secure: false,
+                secure: isProduction,
                 sameSite: "strict",
-                path: "/"
+                path: "/",
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
-
 
             res.cookie("accessToken", accessToken, {
                 httpOnly: true,
-                secure: false,
+                secure: isProduction,
                 sameSite: "strict",
-                path: "/"
+                path: "/",
+                maxAge: 40 * 60 * 1000 // 40 minutes
             });
 
             return res.status(StatusCode.OK).json({
@@ -124,8 +127,11 @@ class UserController implements IUserController {
 
     logout = async (req: Request, res: Response): Promise<Response> => {
         try {
+            const isProduction = config.nodeEnv === "production";
             console.log("My cookie : ", req.cookies);
             const refreshToken = req.cookies?.["refreshToken"]
+            const authHeader = req.headers.authorization;
+            const accessToken = authHeader?.split(" ")[1];
 
             console.log("refresh token :", refreshToken);
 
@@ -137,21 +143,34 @@ class UserController implements IUserController {
 
             await this._userService.logoutUser(refreshToken)
 
+            // Blacklist the access token if it exists
+            if (accessToken) {
+                try {
+                    const decoded = JwtUtils.verifyToken(accessToken) as any;
+                    if (decoded && decoded.userId) {
+                        await BlacklistedTokenModel.create({
+                            token: accessToken,
+                            userId: decoded.userId,
+                            expiresAt: new Date(decoded.exp * 1000)
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error blacklisting access token:", error);
+                }
+            }
+
             res.clearCookie("refreshToken", {
                 httpOnly: true,
-                secure: false,
+                secure: isProduction,
                 sameSite: "strict",
                 path: "/"
-
             })
-
 
             res.clearCookie("accessToken", {
                 httpOnly: true,
-                secure: false,
+                secure: isProduction,
                 sameSite: "strict",
                 path: "/"
-
             })
 
             return res
@@ -169,7 +188,7 @@ class UserController implements IUserController {
 
      renewAuthTokens = async (req: Request, res: Response): Promise<void> => {
         try {
-
+            const isProduction = config.nodeEnv === "production";
             const oldRefreshToken = req.cookies?.["refreshToken"]
 
             if (!oldRefreshToken) {
@@ -185,9 +204,10 @@ class UserController implements IUserController {
 
             res.cookie("accessToken", accessToken, {
                 httpOnly: true,
-                secure: false,
+                secure: isProduction,
                 sameSite: "strict",
-                path: "/"
+                path: "/",
+                maxAge: 40 * 60 * 1000 // 40 minutes
             });
             res.status(StatusCode.OK).json({ success: true, accessToken });
 

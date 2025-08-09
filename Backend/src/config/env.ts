@@ -19,10 +19,6 @@ export const config = {
     refreshSecret:process.env.REFRESH_TOKEN_SECRET as string,
     accessTokenExpiry: parseInt(process.env.ACCESS_TOKEN_EXPIRY || "900000"), // 15min default
     refreshTokenExpiry: parseInt(process.env.REFRESH_TOKEN_EXPIRY || "86400000"), // 1day default
-    smtp_host:process.env.SMTP_HOST as string,
-    smtp_port:process.env.SMTP_PORT as string,
-    smtp_user:process.env.SMTP_USER as string,
-    smtp_pass:process.env.SMTP_PASS as string,
     local_origin:process.env.LOCAL_ORIGIN,
     vercel_origin:process.env.VERCEL_ORGIN,
     render_origin:process.env.RENDER_ORGIN

@@ -28,7 +28,10 @@ const refreshAccessToken = async (): Promise<string | null> => {
         const response = await axios.post<RefreshResponse>(
             `${API_BASE_URL}/refresh-token`,
             {},
-            { withCredentials: true }
+            { 
+                withCredentials: true,
+                timeout: 10000 // 10 second timeout
+            }
         );
 
         if (response.data.success) {
@@ -41,8 +44,14 @@ const refreshAccessToken = async (): Promise<string | null> => {
 
         return null;
     } catch (error) {
-        console.error("error while refreshin access token", error);
-
+        console.error("error while refreshing access token", error);
+        
+        // If refresh fails, logout user
+        useAuthStore.getState().logout();
+        if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+        }
+        
         return null;
     }
 };

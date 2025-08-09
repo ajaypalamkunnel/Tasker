@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import JwtUtils from "../utils/jwtUtils";
+import { BlacklistedTokenModel } from "../model/blacklistedTokens/BlacklistedToken.model";
 
 
 interface UserPayload {
@@ -16,7 +17,7 @@ declare module "express-serve-static-core" {
     }
 }
 
-const authMiddleWare = (req: Request, res: Response, next: NextFunction): void => {
+const authMiddleWare = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -26,13 +27,18 @@ const authMiddleWare = (req: Request, res: Response, next: NextFunction): void =
     const token = authHeader.split(" ")[1];
 
     try {
+        // Check if token is blacklisted
+        const blacklistedToken = await BlacklistedTokenModel.findOne({ token });
+        if (blacklistedToken) {
+            res.status(401).json({ error: "Token has been revoked" });
+            return;
+        }
+
         const decode = JwtUtils.verifyToken(token) as UserPayload;
         req.user = decode
 
-
         next()
     } catch (error) {
-
         console.error("Invalid token", error);
         res.status(403).json({ error: "Invalid token" })
         return

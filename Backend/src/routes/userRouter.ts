@@ -11,6 +11,7 @@ import { LoginDto } from "../dtos/requestdtos/login.dto";
 import { CreateTaskDto } from "../dtos/requestdtos/create-task.dto";
 import { FetchTasksDto } from "../dtos/requestdtos/fetch-tasks.dto";
 import authMiddleware from "../middleware/authMiddleware";
+import { refreshTokenLimiter, loginLimiter } from "../middleware/rateLimiter";
 
 
 const router = Router()
@@ -29,9 +30,9 @@ const taskController = new TaskController(taskService,userService)
 
 
 router.post("/signup",validateRequest(RegisterDto),userController.registerUser)
-router.post("/login",validateRequest(LoginDto),userController.postLogin)
+router.post("/login",loginLimiter,validateRequest(LoginDto),userController.postLogin)
 router.post("/logout",userController.logout)
-router.post("/refresh-token",userController.renewAuthTokens)
+router.post("/refresh-token",refreshTokenLimiter,userController.renewAuthTokens)
 
 // Task routes
 router.get("/tasks", authMiddleware, taskController.fetchTasks)

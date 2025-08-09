@@ -95,7 +95,13 @@ class UserService implements IUserService {
                 email: user.email
             })
 
+
             const refreshToken = JWTUtils.generateRefreshToken({ userId: user._id })
+
+            
+            console.log("==>",accessToken);
+            console.log("==>",refreshToken);
+            
 
             await this._userRepository.updateRefreshToken(
                 user._id.toString(),
