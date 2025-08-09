@@ -8,43 +8,32 @@ import { ITaskService } from "../../interface/Tasks/ITaskService";
 import { TaskMapper } from "../../../dtos/responseDtos/mapper/task.mapper";
 import { PaginatedTasksResponseDTO } from "../../../dtos/responseDtos/dtos/task.dto";
 
-
-
 class TaskService implements ITaskService {
-    
-    private _taskRepository: ITaskRepository
-    constructor(taskRepository: ITaskRepository,) {
-        
-        this._taskRepository = taskRepository
+    private _taskRepository: ITaskRepository;
+
+    constructor(taskRepository: ITaskRepository) {
+        this._taskRepository = taskRepository;
     }
 
     async createTask(userId: string, taskData: Partial<ITask>): Promise<ITask> {
-
         try {
-           
             const taskWithUser = {
                 ...taskData,
-                userId: new Types.ObjectId(userId)
+                userId: new Types.ObjectId(userId),
             };
 
-            console.log("==>",taskWithUser);
-            
+            console.log("==>", taskWithUser);
+
             const task = await this._taskRepository.create(taskWithUser);
 
-            return task
-
-
+            return task;
         } catch (error) {
-
-            throw new CustomError("Failed to create task", StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError("Failed to create task", StatusCode.INTERNAL_SERVER_ERROR);
         }
-
     }
     
     async updateStatus(id: string, status: TaskStatus): Promise<ITask> {
-
         try {
-
             const task = await this._taskRepository.update(id, { status });
 
             if (!task) {
@@ -71,18 +60,13 @@ class TaskService implements ITaskService {
             }
 
             return task;
-
-
         } catch (error) {
-
             throw new CustomError("Failed to update task", StatusCode.INTERNAL_SERVER_ERROR);
-
         }
     }
 
     async deleteTask(id: string): Promise<ITask> {
         try {
-
             const task = await this._taskRepository.delete(id);
 
             if (!task) {
@@ -90,17 +74,17 @@ class TaskService implements ITaskService {
             }
 
             return task;
-
         } catch (error) {
-
             throw new CustomError("Failed to delete task", StatusCode.INTERNAL_SERVER_ERROR);
-
         }
     }
 
-    async fetchTasksByUserId(userId: string, filter: ITaskFilter, pagination: IPaginationParams): Promise<PaginatedTasksResponseDTO> {
+    async fetchTasksByUserId(
+        userId: string,
+        filter: ITaskFilter,
+        pagination: IPaginationParams,
+    ): Promise<PaginatedTasksResponseDTO> {
         try {
-           
             if (pagination.page < 1) {
                 throw new CustomError("Page number must be greater than 0", StatusCode.BAD_REQUEST);
             }
@@ -115,14 +99,11 @@ class TaskService implements ITaskService {
 
             const result = await this._taskRepository.fetchTasksByUserId(userId, filter, pagination);
 
-            if(!result){
+            if (!result) {
                 throw new CustomError("No tasks found", StatusCode.NOT_FOUND);
             }
 
-           
-            
-            return TaskMapper.toPaginatedTasksDTO(result)
-
+            return TaskMapper.toPaginatedTasksDTO(result);
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;
@@ -138,4 +119,4 @@ class TaskService implements ITaskService {
 
 }
 
-export default TaskService
+export default TaskService;

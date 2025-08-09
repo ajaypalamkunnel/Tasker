@@ -16,33 +16,27 @@ class UserController implements IUserController {
     }
 
     registerUser = async (req: Request, res: Response): Promise<Response> => {
-
         try {
-
             const { name, email, password } = req.body as RegisterDto;
 
             const { user } = await this._userService.registration({
                 name,
                 email,
                 password,
-            })
+            });
 
             return res.status(StatusCode.CREATED).json({
                 message: "User registered successfully",
                 userId: user._id,
             });
-
-
-
         } catch (error) {
-
             console.error("Registration error:", error);
 
             return res
                 .status(
                     error instanceof CustomError
                         ? error.statusCode
-                        : StatusCode.INTERNAL_SERVER_ERROR
+                        : StatusCode.INTERNAL_SERVER_ERROR,
                 )
                 .json({
                     error:
@@ -50,16 +44,12 @@ class UserController implements IUserController {
                             ? error.message
                             : "Internal server error",
                 });
-
         }
-
-    }
+    };
     postLogin = async (req: Request, res: Response): Promise<Response> => {
         try {
-
-            const { email, password } = req.body
+            const { email, password } = req.body;
             console.log(req.body);
-
 
             if (!email || !password) {
                 return res
@@ -67,7 +57,10 @@ class UserController implements IUserController {
                     .json({ error: "Email and Password are required" });
             }
 
-            const { accessToken, refreshToken, user } = await this._userService.loginUser(email, password)
+            const { accessToken, refreshToken, user } = await this._userService.loginUser(
+                email,
+                password,
+            );
             const isProduction = config.nodeEnv === "production";
 
             console.log("env status : ", isProduction);
@@ -77,7 +70,7 @@ class UserController implements IUserController {
                 secure: isProduction,
                 sameSite: "strict",
                 path: "/",
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
             });
 
             res.cookie("accessToken", accessToken, {
@@ -85,7 +78,7 @@ class UserController implements IUserController {
                 secure: isProduction,
                 sameSite: "strict",
                 path: "/",
-                maxAge: 40 * 60 * 1000 // 40 minutes
+                maxAge: 40 * 60 * 1000, // 40 minutes
             });
 
             return res.status(StatusCode.OK).json({
@@ -98,32 +91,30 @@ class UserController implements IUserController {
                     isVerified: user?.isVerified,
                     name: user?.name,
                 },
-            })
+            });
         } catch (error) {
             console.log("===>", error);
-
 
             return res
                 .status(
                     error instanceof CustomError
                         ? error.statusCode
-                        : StatusCode.INTERNAL_SERVER_ERROR
+                        : StatusCode.INTERNAL_SERVER_ERROR,
                 )
                 .json(
                     error instanceof CustomError
                         ? error.message
-                        : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+                        : ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
                 );
-
         }
-    }
+    };
 
 
     logout = async (req: Request, res: Response): Promise<Response> => {
         try {
             const isProduction = config.nodeEnv === "production";
             console.log("My cookie : ", req.cookies);
-            const refreshToken = req.cookies?.["refreshToken"]
+            const refreshToken = req.cookies?.["refreshToken"];
             const authHeader = req.headers.authorization;
             const accessToken = authHeader?.split(" ")[1];
 
@@ -135,7 +126,7 @@ class UserController implements IUserController {
                     .json({ error: "No refresh token provided" });
             }
 
-            await this._userService.logoutUser(refreshToken)
+            await this._userService.logoutUser(refreshToken);
 
             // Blacklist the access token if it exists
             if (accessToken) {
@@ -145,7 +136,7 @@ class UserController implements IUserController {
                         await BlacklistedTokenModel.create({
                             token: accessToken,
                             userId: decoded.userId,
-                            expiresAt: new Date(decoded.exp * 1000)
+                            expiresAt: new Date(decoded.exp * 1000),
                         });
                     }
                 } catch (error) {
@@ -157,33 +148,29 @@ class UserController implements IUserController {
                 httpOnly: true,
                 secure: isProduction,
                 sameSite: "strict",
-                path: "/"
-            })
+                path: "/",
+            });
 
             res.clearCookie("accessToken", {
                 httpOnly: true,
                 secure: isProduction,
                 sameSite: "strict",
-                path: "/"
-            })
+                path: "/",
+            });
 
-            return res
-                .status(StatusCode.OK)
-                .json({ success: true, message: "Logout successful" });
+            return res.status(StatusCode.OK).json({ success: true, message: "Logout successful" });
 
         } catch (error) {
             console.error("Logout failed", error);
 
-            return res
-                .status(StatusCode.INTERNAL_SERVER_ERROR)
-                .json({ error: "Logout failed" });
+            return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "Logout failed" });
         }
-    }
+    };
 
     renewAuthTokens = async (req: Request, res: Response): Promise<void> => {
         try {
             const isProduction = config.nodeEnv === "production";
-            const oldRefreshToken = req.cookies?.["refreshToken"]
+            const oldRefreshToken = req.cookies?.["refreshToken"];
 
             if (!oldRefreshToken) {
                 res
@@ -201,20 +188,18 @@ class UserController implements IUserController {
                 secure: isProduction,
                 sameSite: "strict",
                 path: "/",
-                maxAge: 40 * 60 * 1000 // 40 minutes
+                maxAge: 40 * 60 * 1000, // 40 minutes
             });
             res.status(StatusCode.OK).json({ success: true, accessToken });
-
-
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({
                 error:
                     error instanceof Error ? error.message : "Failed to refresh token",
             });
         }
-    }
+    };
 
 
 }
 
-export default UserController
+export default UserController;

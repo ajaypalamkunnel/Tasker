@@ -16,23 +16,23 @@ class TaskController implements ITaskController {
     }
 
     addTask = async (req: Request, res: Response): Promise<Response> => {
-        
+
         try {
 
             const userId = req.user?.userId
             const taskData = { ...req.body, userId: userId }
 
-            console.log("==>",userId,taskData);
-            
-    
-            const response = await this._taskService.createTask(userId!,taskData)
-    
+
+
+
+            const response = await this._taskService.createTask(userId!, taskData)
+
             return res.status(StatusCode.CREATED).json({
                 success: true,
                 message: "Task created successfully",
                 data: response
             })
-            
+
         } catch (error) {
 
             console.log("Task creation error", error);
@@ -48,20 +48,20 @@ class TaskController implements ITaskController {
                         ? error.message
                         : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
                 );
-            
+
         }
-       
+
 
 
 
     }
-        updateTaskStatus = async (req: Request, res: Response): Promise<Response> => {
+    updateTaskStatus = async (req: Request, res: Response): Promise<Response> => {
         try {
 
-            const {id} = req.params
-            const {status} = req.body
+            const { id } = req.params
+            const { status } = req.body
 
-            const response = await this._taskService.updateStatus(id,status)
+            const response = await this._taskService.updateStatus(id, status)
 
             return res.status(StatusCode.OK).json({
                 success: true,
@@ -81,7 +81,7 @@ class TaskController implements ITaskController {
                         ? error.message
                         : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
                 );
-            
+
         }
     }
     editTask = async (req: Request, res: Response): Promise<Response> => {
@@ -146,9 +146,9 @@ class TaskController implements ITaskController {
         try {
             const userId = req.user?.userId;
 
-            console.log("userId==",userId);
-            
-            
+            console.log("userId==", userId);
+
+
             // Get validated query parameters
             const page = (req.query as any).page || 1;
             const limit = (req.query as any).limit || 10;
@@ -160,8 +160,8 @@ class TaskController implements ITaskController {
                 filter.status = status;
             }
 
-            console.log("filter==",filter);
             
+
 
             const response = await this._taskService.fetchTasksByUserId(userId!, filter, { page, limit });
 
@@ -188,7 +188,7 @@ class TaskController implements ITaskController {
                 });
         }
     }
-    
+
 }
 
 export default TaskController
