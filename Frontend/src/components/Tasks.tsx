@@ -7,6 +7,8 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ListTodo,
+  Filter,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import {
@@ -38,8 +40,6 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
         filter !== "all" ? { status: filter } : undefined,
         { page, limit: 5 }
       );
-
-      
 
       if (response.success && response.data) {
         // Handle nested data structure
@@ -129,17 +129,17 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
         {
           value: "pending",
           label: "Pending",
-          color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+          color: "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200 shadow-sm",
         },
         {
           value: "in-progress",
           label: "In Progress",
-          color: "bg-blue-100 text-blue-800 border-blue-200",
+          color: "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200 shadow-sm",
         },
         {
           value: "completed",
           label: "Completed",
-          color: "bg-green-100 text-green-800 border-green-200",
+          color: "bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200 shadow-sm",
         },
       ];
 
@@ -168,16 +168,16 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           disabled={updatingStatus === task._id}
-          className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-            currentStatus?.color || "bg-gray-100 text-gray-800 border-gray-200"
-          } hover:opacity-80 disabled:opacity-50`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold border-2 transition-all duration-200 transform hover:scale-105 ${
+            currentStatus?.color || "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border-gray-200 shadow-sm"
+          } hover:shadow-md disabled:opacity-50 disabled:transform-none`}
         >
           <span>{currentStatus?.label || task.status.replace("-", " ")}</span>
           {updatingStatus === task._id ? (
             <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
           ) : (
             <ChevronDown
-              className={`w-3 h-3 transition-transform ${
+              className={`w-4 h-4 transition-transform duration-200 ${
                 isOpen ? "rotate-180" : ""
               }`}
             />
@@ -185,7 +185,7 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[140px]">
+          <div className="absolute top-full left-0 mt-2 bg-white border-2 border-gray-100 rounded-xl shadow-xl z-20 min-w-[160px] overflow-hidden backdrop-blur-sm">
             {statusOptions.map((option) => (
               <button
                 key={option.value}
@@ -196,11 +196,11 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
                   setIsOpen(false);
                 }}
                 disabled={updatingStatus === task._id}
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${
+                className={`w-full text-left px-4 py-3 text-sm font-medium transition-all duration-200 hover:bg-gradient-to-r ${
                   option.value === task.status
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-700"
-                } disabled:opacity-50`}
+                    ? "bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-700 border-l-4 border-indigo-500"
+                    : "text-gray-700 hover:from-gray-50 hover:to-slate-50 hover:text-gray-900"
+                } disabled:opacity-50 first:rounded-t-xl last:rounded-b-xl`}
               >
                 {option.label}
               </button>
@@ -213,117 +213,134 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex flex-col justify-center items-center py-16 bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gradient-to-r from-blue-400 to-indigo-500 border-t-transparent"></div>
+          <div className="absolute inset-0 animate-pulse rounded-full h-12 w-12 border-4 border-blue-200 opacity-30"></div>
+        </div>
+        <p className="mt-4 text-slate-600 font-medium">Loading your tasks...</p>
       </div>
     );
   }
 
   if (tasks.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500 text-lg">No tasks found</p>
-        <p className="text-gray-400 text-sm mt-2">
+      <div className="text-center py-16 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 rounded-2xl border border-gray-100">
+        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <ListTodo className="w-10 h-10 text-blue-600" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">No tasks found</h3>
+        <p className="text-gray-500 text-base max-w-md mx-auto leading-relaxed">
           {filter !== "all"
-            ? `No ${filter} tasks`
-            : "Create your first task to get started"}
+            ? `No ${filter.replace("-", " ")} tasks available`
+            : "Ready to get organized? Create your first task and start achieving your goals!"}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filter */}
-      <div className="flex gap-2 mb-6">
-        <button
-          onClick={() => setFilter("all")}
-          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-            filter === "all"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => setFilter("pending")}
-          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-            filter === "pending"
-              ? "bg-yellow-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          Pending
-        </button>
-        <button
-          onClick={() => setFilter("in-progress")}
-          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-            filter === "in-progress"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          In Progress
-        </button>
-        <button
-          onClick={() => setFilter("completed")}
-          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-            filter === "completed"
-              ? "bg-green-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          Completed
-        </button>
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* Enhanced Filter Section */}
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-2 rounded-xl">
+            <Filter className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-800">Filter Tasks</h3>
+        </div>
+        
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setFilter("all")}
+            className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+              filter === "all"
+                ? "bg-gradient-to-r from-slate-600 to-gray-700 text-white shadow-lg"
+                : "bg-gradient-to-r from-gray-50 to-slate-50 text-gray-700 hover:from-gray-100 hover:to-slate-100 border border-gray-200"
+            }`}
+          >
+            All Tasks
+          </button>
+          <button
+            onClick={() => setFilter("pending")}
+            className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+              filter === "pending"
+                ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg"
+                : "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 hover:from-amber-100 hover:to-yellow-100 border border-amber-200"
+            }`}
+          >
+            Pending
+          </button>
+          <button
+            onClick={() => setFilter("in-progress")}
+            className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+              filter === "in-progress"
+                ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg"
+                : "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 hover:from-blue-100 hover:to-indigo-100 border border-blue-200"
+            }`}
+          >
+            In Progress
+          </button>
+          <button
+            onClick={() => setFilter("completed")}
+            className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+              filter === "completed"
+                ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg"
+                : "bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 hover:from-emerald-100 hover:to-green-100 border border-emerald-200"
+            }`}
+          >
+            Completed
+          </button>
+        </div>
       </div>
 
-      {/* Task List */}
-      <div className="space-y-3">
-        {tasks.map((task) => (
+      {/* Enhanced Task List */}
+      <div className="grid gap-6">
+        {tasks.map((task, index) => (
           <div
             key={task._id}
-            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            className="group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in"
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+              <div className="flex-1 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
                     {task.title}
                   </h3>
                   <StatusDropdown task={task} />
                 </div>
 
-                <p className="text-gray-600 mb-3 line-clamp-2">
+                <p className="text-gray-600 text-base leading-relaxed line-clamp-3">
                   {task.description}
                 </p>
 
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>Due: {formatDate(task.dueDate)}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-rose-200">
+                    <Calendar className="w-4 h-4 text-rose-600" />
+                    <span className="font-medium text-rose-700">Due: {formatDate(task.dueDate)}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>Created: {formatDate(task.createdAt || "")}</span>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
+                    <Clock className="w-4 h-4 text-slate-600" />
+                    <span className="font-medium text-slate-700">Created: {formatDate(task.createdAt || "")}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 ml-4">
+              <div className="flex items-center gap-3 lg:flex-col lg:gap-2">
                 <button
                   onClick={() => onEditTask(task)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="flex items-center justify-center p-3 text-blue-600 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-xl border border-blue-200 transition-all duration-200 transform hover:scale-110 hover:shadow-md group/btn"
                   title="Edit task"
                 >
-                  <Edit className="w-4 h-4" />
+                  <Edit className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-200" />
                 </button>
                 <button
                   onClick={() => handleDeleteTask(task._id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="flex items-center justify-center p-3 text-red-600 bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 rounded-xl border border-red-200 transition-all duration-200 transform hover:scale-110 hover:shadow-md group/btn"
                   title="Delete task"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-200" />
                 </button>
               </div>
             </div>
@@ -331,56 +348,56 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
         ))}
       </div>
 
-      {/* Pagination */}
-      {totalPages >= 1 && (
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-          <div className="text-sm text-gray-600">
-            Showing {(currentPage - 1) * 5 + 1} to{" "}
-            {Math.min(currentPage * 5, totalTasks)} of {totalTasks} tasks
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage <= 1}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Previous
-            </button>
-
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      page === currentPage
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
+      {/* Enhanced Pagination */}
+      {totalPages > 1 && (
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm font-medium text-gray-600 bg-gradient-to-r from-gray-50 to-slate-50 px-4 py-2 rounded-xl border border-gray-200">
+              Showing <span className="font-bold text-gray-800">{(currentPage - 1) * 5 + 1}</span> to{" "}
+              <span className="font-bold text-gray-800">{Math.min(currentPage * 5, totalTasks)}</span> of{" "}
+              <span className="font-bold text-blue-600">{totalTasks}</span> tasks
             </div>
 
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Next
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage <= 1}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 bg-gradient-to-r from-gray-50 to-slate-50 border-2 border-gray-200 rounded-xl hover:from-gray-100 hover:to-slate-100 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 transform hover:scale-110 ${
+                        page === currentPage
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg"
+                          : "text-gray-700 bg-gradient-to-r from-gray-50 to-slate-50 border-2 border-gray-200 hover:from-gray-100 hover:to-slate-100 hover:shadow-md"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 bg-gradient-to-r from-gray-50 to-slate-50 border-2 border-gray-200 rounded-xl hover:from-gray-100 hover:to-slate-100 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}
-      
-      {/* Debug info - remove this after testing */}
-      
     </div>
   );
 };
