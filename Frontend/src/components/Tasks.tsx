@@ -18,6 +18,7 @@ import {
 } from "../services/userService";
 import type { ITask, TaskStatus } from "../types/task";
 import { formatDate } from "../utils/dataFormate";
+import ConfirmationModal from "./ConfirmationModal";
 
 interface TaskListProps {
   onEditTask: (task: ITask) => void;
@@ -32,6 +33,8 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalTasks, setTotalTasks] = useState(0);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const loadTasks = async (page: number = 1) => {
     try {
@@ -78,12 +81,15 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!window.confirm("Are you sure you want to delete this task?")) {
-      return;
-    }
+    setTaskToDelete(taskId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteTask = async () => {
+    if (!taskToDelete) return;
 
     try {
-      const response = await deleteTask(taskId);
+      const response = await deleteTask(taskToDelete);
 
       if (response.success) {
         toast.success("Task deleted successfully");
@@ -94,6 +100,8 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
     } catch (error) {
       console.error("Error deleting task:", error);
       toast.error("Failed to delete task");
+    } finally {
+      setTaskToDelete(null);
     }
   };
 
@@ -213,35 +221,75 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center py-16 bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gradient-to-r from-blue-400 to-indigo-500 border-t-transparent"></div>
-          <div className="absolute inset-0 animate-pulse rounded-full h-12 w-12 border-4 border-blue-200 opacity-30"></div>
+      <div className="space-y-8 max-w-6xl mx-auto">
+        {/* Enhanced Filter Section - Always visible */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-2 rounded-xl">
+              <Filter className="w-5 h-5 text-white" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-800">Filter Tasks</h3>
+          </div>
+          
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+                filter === "all"
+                  ? "bg-gradient-to-r from-slate-600 to-gray-700 text-white shadow-lg"
+                  : "bg-gradient-to-r from-gray-50 to-slate-50 text-gray-700 hover:from-gray-100 hover:to-slate-100 border border-gray-200"
+              }`}
+            >
+              All Tasks
+            </button>
+            <button
+              onClick={() => setFilter("pending")}
+              className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+                filter === "pending"
+                  ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg"
+                  : "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 hover:from-amber-100 hover:to-yellow-100 border border-amber-200"
+              }`}
+            >
+              Pending
+            </button>
+            <button
+              onClick={() => setFilter("in-progress")}
+              className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+                filter === "in-progress"
+                  ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg"
+                  : "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 hover:from-blue-100 hover:to-indigo-100 border border-blue-200"
+              }`}
+            >
+              In Progress
+            </button>
+            <button
+              onClick={() => setFilter("completed")}
+              className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+                filter === "completed"
+                  ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg"
+                  : "bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 hover:from-emerald-100 hover:to-green-100 border border-emerald-200"
+              }`}
+            >
+              Completed
+            </button>
+          </div>
         </div>
-        <p className="mt-4 text-slate-600 font-medium">Loading your tasks...</p>
-      </div>
-    );
-  }
 
-  if (tasks.length === 0) {
-    return (
-      <div className="text-center py-16 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 rounded-2xl border border-gray-100">
-        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-          <ListTodo className="w-10 h-10 text-blue-600" />
+        {/* Loading State */}
+        <div className="flex flex-col justify-center items-center py-16 bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gradient-to-r from-blue-400 to-indigo-500 border-t-transparent"></div>
+            <div className="absolute inset-0 animate-pulse rounded-full h-12 w-12 border-4 border-blue-200 opacity-30"></div>
+          </div>
+          <p className="mt-4 text-slate-600 font-medium">Loading your tasks...</p>
         </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-2">No tasks found</h3>
-        <p className="text-gray-500 text-base max-w-md mx-auto leading-relaxed">
-          {filter !== "all"
-            ? `No ${filter.replace("-", " ")} tasks available`
-            : "Ready to get organized? Create your first task and start achieving your goals!"}
-        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Enhanced Filter Section */}
+      {/* Enhanced Filter Section - Always visible */}
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
         <div className="flex items-center gap-3 mb-4">
           <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-2 rounded-xl">
@@ -294,59 +342,73 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
         </div>
       </div>
 
-      {/* Enhanced Task List */}
-      <div className="grid gap-6">
-        {tasks.map((task, index) => (
-          <div
-            key={task._id}
-            className="group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-              <div className="flex-1 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
-                    {task.title}
-                  </h3>
-                  <StatusDropdown task={task} />
+      {/* Task List or Empty State */}
+      {tasks.length === 0 ? (
+        <div className="text-center py-16 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 rounded-2xl border border-gray-100">
+          <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <ListTodo className="w-10 h-10 text-blue-600" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No tasks found</h3>
+          <p className="text-gray-500 text-base max-w-md mx-auto leading-relaxed">
+            {filter !== "all"
+              ? `No ${filter.replace("-", " ")} tasks available`
+              : "Ready to get organized? Create your first task and start achieving your goals!"}
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {tasks.map((task, index) => (
+            <div
+              key={task._id}
+              className="group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                <div className="flex-1 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                      {task.title}
+                    </h3>
+                    <StatusDropdown task={task} />
+                  </div>
+
+                  <p className="text-gray-600 text-base leading-relaxed line-clamp-3">
+                    {task.description}
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-rose-200">
+                      <Calendar className="w-4 h-4 text-rose-600" />
+                      <span className="font-medium text-rose-700">Due: {formatDate(task.dueDate)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
+                      <Clock className="w-4 h-4 text-slate-600" />
+                      <span className="font-medium text-slate-700">Created: {formatDate(task.createdAt || "")}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <p className="text-gray-600 text-base leading-relaxed line-clamp-3">
-                  {task.description}
-                </p>
-
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-rose-200">
-                    <Calendar className="w-4 h-4 text-rose-600" />
-                    <span className="font-medium text-rose-700">Due: {formatDate(task.dueDate)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
-                    <Clock className="w-4 h-4 text-slate-600" />
-                    <span className="font-medium text-slate-700">Created: {formatDate(task.createdAt || "")}</span>
-                  </div>
+                <div className="flex items-center gap-3 lg:flex-col lg:gap-2">
+                  <button
+                    onClick={() => onEditTask(task)}
+                    className="flex items-center justify-center p-3 text-blue-600 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-xl border border-blue-200 transition-all duration-200 transform hover:scale-110 hover:shadow-md group/btn"
+                    title="Edit task"
+                  >
+                    <Edit className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-200" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTask(task._id)}
+                    className="flex items-center justify-center p-3 text-red-600 bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 rounded-xl border border-red-200 transition-all duration-200 transform hover:scale-110 hover:shadow-md group/btn"
+                    title="Delete task"
+                  >
+                    <Trash2 className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-200" />
+                  </button>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-3 lg:flex-col lg:gap-2">
-                <button
-                  onClick={() => onEditTask(task)}
-                  className="flex items-center justify-center p-3 text-blue-600 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-xl border border-blue-200 transition-all duration-200 transform hover:scale-110 hover:shadow-md group/btn"
-                  title="Edit task"
-                >
-                  <Edit className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-200" />
-                </button>
-                <button
-                  onClick={() => handleDeleteTask(task._id)}
-                  className="flex items-center justify-center p-3 text-red-600 bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 rounded-xl border border-red-200 transition-all duration-200 transform hover:scale-110 hover:shadow-md group/btn"
-                  title="Delete task"
-                >
-                  <Trash2 className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-200" />
-                </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Enhanced Pagination */}
       {totalPages > 1 && (
@@ -398,6 +460,21 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setTaskToDelete(null);
+        }}
+        onConfirm={confirmDeleteTask}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmText="Delete Task"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };
