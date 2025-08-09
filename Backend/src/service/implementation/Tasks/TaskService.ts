@@ -5,6 +5,8 @@ import { IUserRepositroy } from "../../../repository/interface/User/IUserReposit
 import { ITask, TaskStatus, ITaskFilter, IPaginationParams, IPaginatedTasksResponse } from "../../../types/tasks.types";
 import { CustomError } from "../../../utils/CustomError";
 import { ITaskService } from "../../interface/Tasks/ITaskService";
+import { TaskMapper } from "../../../dtos/responseDtos/mapper/task.mapper";
+import { PaginatedTasksResponseDTO } from "../../../dtos/responseDtos/dtos/task.dto";
 
 
 
@@ -19,7 +21,7 @@ class TaskService implements ITaskService {
     async createTask(userId: string, taskData: Partial<ITask>): Promise<ITask> {
 
         try {
-            // Ensure userId is properly set as ObjectId
+           
             const taskWithUser = {
                 ...taskData,
                 userId: new Types.ObjectId(userId)
@@ -96,9 +98,9 @@ class TaskService implements ITaskService {
         }
     }
 
-    async fetchTasksByUserId(userId: string, filter: ITaskFilter, pagination: IPaginationParams): Promise<IPaginatedTasksResponse> {
+    async fetchTasksByUserId(userId: string, filter: ITaskFilter, pagination: IPaginationParams): Promise<PaginatedTasksResponseDTO> {
         try {
-            // Validate pagination parameters
+           
             if (pagination.page < 1) {
                 throw new CustomError("Page number must be greater than 0", StatusCode.BAD_REQUEST);
             }
@@ -117,9 +119,9 @@ class TaskService implements ITaskService {
                 throw new CustomError("No tasks found", StatusCode.NOT_FOUND);
             }
 
-            console.log(result);
+           
             
-            return result;
+            return TaskMapper.toPaginatedTasksDTO(result)
 
         } catch (error) {
             if (error instanceof CustomError) {

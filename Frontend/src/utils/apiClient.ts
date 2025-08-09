@@ -20,7 +20,7 @@ export async function apiRequest<T>(
             ...config,
         });
 
-        console.log("response : ", response);
+        
 
 
         return {

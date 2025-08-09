@@ -39,15 +39,15 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
         { page, limit: 5 }
       );
 
-      console.log("tasks===>", response);
+      
 
       if (response.success && response.data) {
         // Handle nested data structure
         const tasksData = response.data;
         setTasks(tasksData.data.tasks || []);
-        setTotalPages(tasksData.data.pagination?.totalPages || 1);
-        setTotalTasks(tasksData.data.pagination?.totalTasks || 0);
-        setCurrentPage(tasksData.data.pagination?.currentPage || 1);
+        setTotalPages(Number(tasksData.data.pagination?.totalPages) || 1);
+        setTotalTasks(Number(tasksData.data.pagination?.totalTasks) || 0);
+        setCurrentPage(Number(tasksData.data.pagination?.currentPage) || 1);
       } else {
         toast.error(response.message || "Failed to load tasks");
       }
@@ -64,9 +64,16 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
   }, [refreshTrigger, filter]);
 
   const handlePageChange = (newPage: number) => {
+    console.log("handlePageChange called with:", newPage);
+    console.log("current totalPages:", totalPages, "type:", typeof totalPages);
+    console.log("condition check:", newPage >= 1 && newPage <= totalPages);
+    
     if (newPage >= 1 && newPage <= totalPages) {
+      console.log("Loading page:", newPage);
       setCurrentPage(newPage);
       loadTasks(newPage);
+    } else {
+      console.log("Page change rejected:", { newPage, totalPages });
     }
   };
 
@@ -325,7 +332,7 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages >= 1 && (
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
           <div className="text-sm text-gray-600">
             Showing {(currentPage - 1) * 5 + 1} to{" "}
@@ -371,6 +378,9 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
           </div>
         </div>
       )}
+      
+      {/* Debug info - remove this after testing */}
+      
     </div>
   );
 };

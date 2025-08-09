@@ -1,10 +1,10 @@
 
-import { Document, ObjectId, Types } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export type TaskStatus = "pending" | "in-progress" | "completed";
 
 export interface ITask extends Document {
-  _id: ObjectId
+  _id: Types.ObjectId
   userId: Types.ObjectId; 
   title: string;
   description: string;

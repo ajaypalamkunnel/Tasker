@@ -8,11 +8,11 @@ import userRoute from "./routes/userRouter"
 import morganMiddleware from "./middleware/morganMiddleware";
 const app = express()
 const PORT = config.port
+const LOCAL_ORIGIN = config.local_origin
+const VERCEL_ORIGIN = config.vercel_origin
+const RENDER_ORIGIN = config.render_origin
 
-
-
-
-const allowedOrigins = ['http://localhost:5173', 'https://tasker.vercel.app', 'https://tasker.onrender.com'];
+const allowedOrigins = [LOCAL_ORIGIN, VERCEL_ORIGIN, RENDER_ORIGIN];
 
 app.use(
     cors({
