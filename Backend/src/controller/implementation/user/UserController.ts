@@ -14,26 +14,26 @@ class UserController implements IUserController {
     constructor(userService: IUserService) {
         this._userService = userService;
     }
-    
-    registerUser = async (req: Request, res: Response): Promise<Response>=>{
+
+    registerUser = async (req: Request, res: Response): Promise<Response> => {
 
         try {
 
             const { name, email, password } = req.body as RegisterDto;
 
-            const {user} = await this._userService.registration({
+            const { user } = await this._userService.registration({
                 name,
                 email,
                 password,
             })
 
-              return res.status(StatusCode.CREATED).json({
+            return res.status(StatusCode.CREATED).json({
                 message: "User registered successfully",
                 userId: user._id,
             });
 
 
-            
+
         } catch (error) {
 
             console.error("Registration error:", error);
@@ -50,22 +50,16 @@ class UserController implements IUserController {
                             ? error.message
                             : "Internal server error",
                 });
-            
+
         }
-        
-    }
-    resendOtp(req: Request, res: Response): Promise<Response> {
-        throw new Error("Method not implemented.");
-    }
-    verifyOtp(req: Request, res: Response): Promise<Response> {
-        throw new Error("Method not implemented.");
+
     }
     postLogin = async (req: Request, res: Response): Promise<Response> => {
         try {
 
             const { email, password } = req.body
             console.log(req.body);
-            
+
 
             if (!email || !password) {
                 return res
@@ -186,7 +180,7 @@ class UserController implements IUserController {
         }
     }
 
-     renewAuthTokens = async (req: Request, res: Response): Promise<void> => {
+    renewAuthTokens = async (req: Request, res: Response): Promise<void> => {
         try {
             const isProduction = config.nodeEnv === "production";
             const oldRefreshToken = req.cookies?.["refreshToken"]

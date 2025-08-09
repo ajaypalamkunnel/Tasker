@@ -3,7 +3,6 @@ import { UserModel } from "../../../model/user/User.model";
 import { IUserRepositroy } from "../../../repository/interface/User/IUserRepository";
 import { IUser } from "../../../types/user.types";
 import { CustomError } from "../../../utils/CustomError";
-import { sendOTPEmail } from "../../../utils/emailUtils";
 import JWTUtils from "../../../utils/jwtUtils";
 import PasswordUtils from "../../../utils/PasswordUtils";
 import { IUserService } from "../../interface/IUserService";
@@ -17,10 +16,6 @@ class UserService implements IUserService {
         this._userRepository = userRepository;
     }
 
-    // private generateOTP(): string {
-    //     return Math.floor(100000 + Math.random() * 900000).toString();
-    // }
-
     async registration(userDetails: Partial<IUser>): Promise<{ user: IUser }> {
         try {
             const { name, email, password } = userDetails;
@@ -32,13 +27,12 @@ class UserService implements IUserService {
                 throw new CustomError("Email already exists", StatusCode.CONFLICT);
             }
 
-            //  const otp = this.generateOTP();
-            // const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+
             const hashedPassword = await PasswordUtils.hashPassword(password!);
 
 
 
-            /** ---- Create the user ---- **/
+            // ---- Create the user ---- 
             const user = await UserModel.create({
                 name: name?.trim(),
                 email: email?.toLowerCase(),
@@ -57,18 +51,9 @@ class UserService implements IUserService {
             );
         }
     }
-    resendOtp(email: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    verifyOtp(email: string, otp: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-
     async loginUser(email: string, password: string): Promise<{ user: IUser | null; accessToken: string; refreshToken: string; }> {
         try {
 
-            console.log("service");
-            
 
             const user = await this._userRepository.findUserByEmail(email)
 
@@ -98,18 +83,14 @@ class UserService implements IUserService {
 
             const refreshToken = JWTUtils.generateRefreshToken({ userId: user._id })
 
-            
-            console.log("==>",accessToken);
-            console.log("==>",refreshToken);
-            
+
 
             await this._userRepository.updateRefreshToken(
                 user._id.toString(),
                 refreshToken
             )
 
-            console.log("[][]===>",user);
-            
+
 
             return { accessToken, refreshToken, user }
 

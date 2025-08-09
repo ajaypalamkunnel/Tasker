@@ -22,21 +22,20 @@ const SignupPage: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setError,
     watch,
   } = useForm<SignupFormData>();
 
   const watchPassword = watch('password');
 
   const onSubmit = async (data: SignupFormData) => {
-    console.log('Signup data:', data);
+   
     
     // Remove confirmPassword from data before sending to API
-    const { confirmPassword, ...signupData } = data;
+    const { ...signupData } = data;
     
     const response = await signup(signupData);
 
-    console.log("===>", response);
+   
 
     if (response.success) {
       toast.success('Account created successfully!');

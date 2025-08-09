@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import { ParamsDictionary } from "express-serve-static-core";
+import { ParsedQs } from "qs";
 
 // Rate limiter for refresh token endpoint
 export const refreshTokenLimiter = rateLimit({
@@ -11,9 +13,8 @@ export const refreshTokenLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     skipSuccessfulRequests: false,
-    keyGenerator: (req) => {
-        // Use IP + user agent for better rate limiting
-        return (req.ip || 'unknown-ip') + (req.get('User-Agent') || 'unknown-agent');
+     keyGenerator: (req: Request<ParamsDictionary, any, any, ParsedQs>) => {
+        return ipKeyGenerator(req as any) + (req.get("User-Agent") || "unknown-agent");
     }
 });
 
@@ -32,7 +33,7 @@ export const apiLimiter = rateLimit({
 // Login endpoint rate limiter
 export const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // limit each IP to 5 login attempts per windowMs
+    max: 15, // limit each IP to 5 login attempts per windowMs
     message: {
         error: "Too many login attempts, please try again later."
     },

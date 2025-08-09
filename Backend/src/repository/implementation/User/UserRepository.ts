@@ -10,9 +10,8 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepositroy {
         super(UserModel)
     }
     async findUserByEmail(email: string): Promise<IUser | null> {
-        return await UserModel.findOne({email})
+        return await UserModel.findOne({ email })
     }
-
 
     async updateRefreshToken(
         userId: string,
@@ -22,7 +21,7 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepositroy {
     }
 
     async removeRefreshToken(refreshToken: string): Promise<void> {
-        await UserModel.updateOne({refreshToken},{$unset:{refreshToken:1}})
+        await UserModel.updateOne({ refreshToken }, { $unset: { refreshToken: 1 } })
     }
 
 

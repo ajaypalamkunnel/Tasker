@@ -21,7 +21,6 @@ const LoginPage: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setError,
   } = useForm<LoginFormData>();
 
   const onSubmit = async (data: LoginFormData) => {
