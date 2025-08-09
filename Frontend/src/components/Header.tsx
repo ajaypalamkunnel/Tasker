@@ -1,10 +1,4 @@
-import {
-  ChevronDown,
-  LogOut,
-  Settings,
-  User,
-  User2,
-} from "lucide-react";
+import { ChevronDown, LogOut,  User } from "lucide-react";
 import { useState } from "react";
 import useAuthStore from "../store/userStore";
 import { useNavigate } from "react-router-dom";
@@ -37,12 +31,9 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <a href="/">
-            <h1 className="text-xl font-bold text-gray-900">Tasker</h1>
-
+              <h1 className="text-xl font-bold text-gray-900">Tasker</h1>
             </a>
           </div>
-
-        
 
           {/* User Profile */}
           <div className="relative">
@@ -68,17 +59,7 @@ const Header = () => {
                   </p>
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                >
-                  <User2 className="w-4 h-4" />
-                  <span>Profile</span>
-                </button>
-                <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
-                  <Settings className="w-4 h-4" />
-                  <span>Settings</span>
-                </button>
+
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"

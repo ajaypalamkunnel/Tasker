@@ -33,13 +33,19 @@ export interface IPaginationParams {
   limit: number;
 }
 
+export interface IPagination {
+  currentPage: number;
+  totalPages: number;
+  totalTasks: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
 export interface IPaginatedTasksResponse {
-  tasks: ITask[];
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalTasks: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
+  success: boolean;
+  message: string;
+  data: {
+    tasks: ITask[];
+    pagination: IPagination;
   };
 } 

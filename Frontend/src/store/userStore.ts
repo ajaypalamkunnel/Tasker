@@ -17,7 +17,7 @@ type AuthState = {
 };
 
 type AuthActions = {
-    login: (user: User, accessToken: string) => void;
+    login: (user: User, accessToken?: string) => void;
     logout: () => void;
     setLoading: (isLoading: boolean) => void;
     setError: (error: string | null) => void;

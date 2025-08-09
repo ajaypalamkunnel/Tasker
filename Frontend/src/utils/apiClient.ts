@@ -11,8 +11,8 @@ export async function apiRequest<T>(
     config?: AxiosRequestConfig
 ): Promise<ApiResponse<T>> {
     try {
-        console.log("hellooo");
-        
+
+
         const response = await axiosInstance.request<ApiResponse<T>>({
             url,
             method,
@@ -20,20 +20,20 @@ export async function apiRequest<T>(
             ...config,
         });
 
-        console.log("Response : ",response);
-        
+        console.log("response : ", response);
+
 
         return {
             success: true,
-            data: response.data.data as T
+            data: response.data as T
         };
     } catch (error: unknown) {
         let message = "An unexpected error occurred.";
-        console.log("❌",error);
-        
+        console.log("❌", error);
+
         if (axios.isAxiosError(error)) {
             const errorData = error.response?.data;
-            
+
             // Handle different error response structures from backend
             if (typeof errorData === 'string') {
                 // Backend sends plain string error
